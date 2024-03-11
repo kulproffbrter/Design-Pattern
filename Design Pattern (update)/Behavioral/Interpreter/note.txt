@@ -1,0 +1,73 @@
+// สร้าง class RoomContext ขึ้นมา ประกอบไปด้วยตัวแปร ประเภทห้อง หน่วยค่าไฟ และหน่วยค่าน้ำ
+class RoomContext {
+    private int electricityUnits;
+    private int waterUnits;
+    private String roomType;
+
+    public RoomContext(int electricityUnits, int waterUnits, String roomType) {
+        this.electricityUnits = electricityUnits;
+        this.waterUnits = waterUnits;
+        this.roomType = roomType;
+    }
+
+    public int getElectricityUnits() {
+        return electricityUnits;
+    }
+
+    public int getWaterUnits() {
+        return waterUnits;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+}
+
+// Expression
+interface Interpreter { // Interpreter ใช้ระบุ Method interpret เพื่อใช้ในการ override
+    int interpret(RoomContext context);
+}
+
+// Terminal Expression ของค่าไฟ
+// การ Override มาจากการ inherited from superclass โดยการ copy superclass
+// มาแล้วเปลี่ยนพฤติกรรมแต่ไม่เปลี่ยนโครงสร้างเดิม
+// implements interface Interpreter มา แล้วทำการ Override โดยใช้ Method
+// interpret
+class ElectricityExpression implements Interpreter {
+    @Override
+    public int interpret(RoomContext context) {
+        int cost = context.getElectricityUnits() * 7; // 7 บาทต่อหน่วย
+        return cost;
+    }
+}
+
+// Terminal Expression ของค่าน้ำ
+class WaterExpression implements Interpreter {
+    @Override
+    public int interpret(RoomContext context) {
+        int cost = context.getWaterUnits() * 16; // 16 บาทต่อหน่วย
+        return cost;
+    }
+}
+
+// Non-terminal Expression ของประเภทห้อง
+class RoomTypeExpression implements Interpreter {
+    @Override
+    // สร้างตัวแปร totalCost เพื่อเก็บค่าผลการคำนวณ
+    public int interpret(RoomContext context) {
+        int totalCost = new ElectricityExpression().interpret(context) + new WaterExpression().interpret(context);
+
+        // สูตรในการคำนวณ คือ หน่วยค่าไฟ คูณด้วย 7 (ค่าไฟหน่วยละ 7 บาท) บวกกับ
+        // หน่วยค่าน้ำ คูณด้วย 16 (ค่าน้ำหน่วยละ 16 บาท)
+        // และนำมาหารกับเงื่อนไขของประเภทห้อง
+        // กำหนดให้ ประเภทห้อง 4 คน มีค่าเป็น 4 และประเภทห้อง 2 คน มีค่าเป็น 2
+        if (context.getRoomType().equals("4 people")) {
+            return totalCost / 4;
+        } else if (context.getRoomType().equals("2 people")) {
+            return totalCost / 2;
+        } else {
+            // นอกเหนือจากเงื่อนไขประเภทห้องด้านบน
+            return totalCost;
+        }
+    }
+}
